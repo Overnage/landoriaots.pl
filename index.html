@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="pl">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Landoria Loot</title>
 <style>
-/* ===== KOLORY ===== */
+/* ===== COLORS ===== */
 :root{
   --bg:#141414;
   --panel:#2b2929;
@@ -27,7 +27,7 @@
   --f-mono:Verdana,Arial,Helvetica,sans-serif;
   color-scheme:dark;
 }
-/* ===== KONIEC KOLORÓW ===== */
+/* ===== END OF COLORS ===== */
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:var(--f-body);font-size:14px;line-height:1.5;margin:0}
 .wrap{max-width:980px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;display:flex;flex-direction:column;gap:18px}
@@ -121,7 +121,7 @@ header.has-bg{background-size:cover;background-position:center;border-radius:12p
     </div>
     <div class="search" role="combobox" aria-haspopup="listbox" aria-owns="sugg" aria-expanded="false" id="combo">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Wpisz przedmiot albo potwora, np. crystal mace, Tunnel Tyrant" aria-autocomplete="list" aria-controls="sugg">
+      <input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Type an item or a monster, e.g. crystal mace, Tunnel Tyrant" aria-autocomplete="list" aria-controls="sugg">
       <ul id="sugg" class="sugg" role="listbox" hidden></ul>
     </div>
     <div class="hist" id="hist"></div>
@@ -136,6 +136,7 @@ header.has-bg{background-size:cover;background-position:center;border-radius:12p
 <script>
 "use strict";
 
+/* ===== CONFIGURATION ===== */
 const LOOT_CONFIG = {
   author: "Overnage",
   logo: "",
@@ -148,7 +149,7 @@ const LOOT_CONFIG = {
     // "Behemoth": "client_images/outfits/animoutfit.php?id=55&addons=0&head=0&body=0&legs=0&feet=0&mount=0&direction=3",
   },
 };
-
+/* ===== END OF CONFIGURATION ===== */
 
 (() => {
 const RAR = ["Always", "Common", "Uncommon", "Rare", "Very Rare"];
@@ -156,7 +157,7 @@ const CH = ["100%", "50–100%", "10–50%", "1–10%", "<1%"];
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const num = v => Number.isFinite(+v) ? +v : 0;
-const fmt = n => num(n).toLocaleString("pl-PL");
+const fmt = n => num(n).toLocaleString("en-US");
 const ls = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
@@ -200,9 +201,9 @@ function load(compact) {
     ...[...items.values()].map(i => ({ kind: "item", name: i.name, lc: i.name.toLowerCase(), n: i.drops.length })),
     ...M.map(m => ({ kind: "monster", name: m.name, lc: m.name.toLowerCase(), m }))
   ];
-  $("#meta").textContent = `${M.length} potworów · ${items.size} przedmiotów`;
+  $("#meta").textContent = `${M.length} monsters · ${items.size} items`;
   const author = String(LOOT_CONFIG.author || "").trim();
-  $("#src").textContent = author ? `Autor: ${author}` : "";
+  $("#src").textContent = author ? `Created by ${author}` : "";
 }
 
 const exists = v => v && typeof v.name === "string" &&
@@ -220,7 +221,7 @@ function hl(name, q) {
   if (i < 0) return esc(name);
   return esc(name.slice(0, i)) + "<mark>" + esc(name.slice(i, i + q.length)) + "</mark>" + esc(name.slice(i + q.length));
 }
-const plural = n => n === 1 ? "potwór" : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) ? "potwory" : "potworów";
+const plural = n => n === 1 ? "monster" : "monsters";
 
 let sel = -1, shown = [];
 function suggest() {
@@ -232,10 +233,10 @@ function suggest() {
     .slice(0, 12).map(x => x.e);
   sel = shown.length ? 0 : -1;
   ul.innerHTML = shown.length ? shown.map((e, i) => `<li role="option" id="opt${i}" data-i="${i}" aria-selected="${i === sel}">
-      <span class="kind ${e.kind}">${e.kind === "item" ? "przedmiot" : "potwór"}</span>
+      <span class="kind ${e.kind}">${e.kind === "item" ? "item" : "monster"}</span>
       ${e.kind === "item" ? itemImg(e.name) : monImg(e.name)}<span class="nm">${hl(e.name, q)}</span>
       <span class="info">${e.kind === "item" ? `${e.n} ${plural(e.n)}` : `${fmt(e.m.hp)} HP · ${fmt(e.m.exp)} EXP`}</span></li>`).join("")
-    : `<li class="empty" aria-disabled="true">Nic nie pasuje do „${esc(q)}”</li>`;
+    : `<li class="empty" aria-disabled="true">Nothing matches “${esc(q)}”</li>`;
   ul.hidden = false;
   $("#combo").setAttribute("aria-expanded", "true");
   $("#q").setAttribute("aria-activedescendant", sel >= 0 ? "opt0" : "");
@@ -270,7 +271,7 @@ function pushHist(kind, name) {
   renderHist(h);
 }
 function renderHist(h = readHist()) {
-  $("#hist").innerHTML = h.length ? `<span class="eyebrow">Ostatnio</span>` +
+  $("#hist").innerHTML = h.length ? `<span class="eyebrow">Recent</span>` +
     h.map(x => `<button class="chip" data-k="${x.kind}" data-n="${esc(x.name)}">${esc(x.name)}</button>`).join("") : "";
 }
 $("#hist").addEventListener("click", ev => { const b = ev.target.closest(".chip"); if (b) open(b.dataset.k, b.dataset.n); });
@@ -290,7 +291,7 @@ function render() {
   else renderMonster(el, byName.get(v.name.toLowerCase()));
 }
 
-const COLS = [["monster", "Potwór", 0], ["rar", "Rzadkość", 0], ["c", "Max", 1], ["hp", "HP", 1], ["exp", "EXP", 1], ["eph", "EXP/HP", 1], ["hit", "Max hit", 1]];
+const COLS = [["monster", "Monster", 0], ["rar", "Rarity", 0], ["c", "Max", 1], ["hp", "HP", 1], ["exp", "EXP", 1], ["eph", "EXP/HP", 1], ["hit", "Max hit", 1]];
 const SORT_KEYS = {
   monster: d => d.m.name.toLowerCase(), rar: d => d.r, c: d => d.c, hp: d => d.m.hp, exp: d => d.m.exp,
   eph: d => d.m.hp ? d.m.exp / d.m.hp : 0, hit: d => d.m.hit
@@ -299,56 +300,56 @@ const eph = m => m.hp ? (m.exp / m.hp).toFixed(2) : "–";
 
 function filters() {
   return `<div class="filters">
-    <label for="fb"><input id="fb" type="checkbox" ${state.boss ? "checked" : ""}> Pokaż bossy</label>
-    <label for="fh">Max hit do <input id="fh" type="number" min="0" max="9999999" step="50" inputmode="numeric" placeholder="bez limitu" value="${esc(state.maxHit)}"></label>
+    <label for="fb"><input id="fb" type="checkbox" ${state.boss ? "checked" : ""}> Show bosses</label>
+    <label for="fh">Max hit up to <input id="fh" type="number" min="0" max="9999999" step="50" inputmode="numeric" placeholder="no limit" value="${esc(state.maxHit)}"></label>
   </div>`;
 }
 function renderItem(el, it) {
-  if (!it) { el.innerHTML = `<section class="panel"><p class="empty-state">Nie ma takiego przedmiotu w danych.</p></section>`; return; }
+  if (!it) { el.innerHTML = `<section class="panel"><p class="empty-state">This item is not in the data.</p></section>`; return; }
   const lim = +state.maxHit, key = SORT_KEYS[state.sort];
   const rows = it.drops.filter(d => (state.boss || !d.m.boss) && (!lim || d.m.hit <= lim));
   rows.sort((a, b) => { const x = key(a), y = key(b); return (x < y ? -1 : x > y ? 1 : 0) * state.dir || SORT_KEYS.eph(b) - SORT_KEYS.eph(a); });
   const hidden = it.drops.length - rows.length;
   el.innerHTML = `<section class="panel">
-    <div class="ph"><div class="ph-title">${itemImg(it.name, "ico-lg")}<div><div class="eyebrow">Przedmiot</div><h2>${esc(it.name)}</h2></div></div>
-      <div class="sub">Wypada z ${it.drops.length} ${it.drops.length === 1 ? "potwora" : "potworów"}</div></div>
+    <div class="ph"><div class="ph-title">${itemImg(it.name, "ico-lg")}<div><div class="eyebrow">Item</div><h2>${esc(it.name)}</h2></div></div>
+      <div class="sub">Dropped by ${it.drops.length} ${plural(it.drops.length)}</div></div>
     ${filters()}
     ${rows.length ? `<div class="tbl"><table><thead><tr>${COLS.map(([k, l, n]) => `<th class="sort${n ? " n" : ""}" data-k="${k}" aria-sort="${state.sort === k ? (state.dir > 0 ? "ascending" : "descending") : "none"}">${l}${state.sort === k ? ` <span class="arr">${state.dir > 0 ? "▲" : "▼"}</span>` : ""}</th>`).join("")}</tr></thead><tbody>
       ${rows.map(d => `<tr><td>${monImg(d.m.name)}<button class="link" data-m="${esc(d.m.name)}">${esc(d.m.name)}</button>${d.m.boss ? `<span class="boss">BOSS</span>` : ""}</td>
         <td><span class="rar r${d.r}">${RAR[d.r]}</span> <span class="chance">${CH[d.r]}</span></td>
         <td class="n">${fmt(d.c)}</td><td class="n">${fmt(d.m.hp)}</td><td class="n">${fmt(d.m.exp)}</td>
         <td class="n">${eph(d.m)}</td><td class="n ${hitClass(d.m.hit)}">${fmt(d.m.hit)}</td></tr>`).join("")}
-    </tbody></table></div>` : `<p class="empty-state">Żaden potwór nie spełnia filtrów.</p>`}
-    ${hidden ? `<p class="note">Ukryto ${hidden} przez filtry.</p>` : ""}
+    </tbody></table></div>` : `<p class="empty-state">No monster matches the filters.</p>`}
+    ${hidden ? `<p class="note">${hidden} hidden by filters.</p>` : ""}
   </section>`;
 }
 function renderMonster(el, m) {
-  if (!m) { el.innerHTML = `<section class="panel"><p class="empty-state">Nie ma takiego potwora w danych.</p></section>`; return; }
+  if (!m) { el.innerHTML = `<section class="panel"><p class="empty-state">This monster is not in the data.</p></section>`; return; }
   const worst = m.spells.reduce((a, s) => a + s.max, 0);
   const sp = [...m.spells].sort((a, b) => b.max - a.max);
   const top = Math.max(1, ...sp.map(s => s.max));
   const groups = [0, 1, 2, 3, 4].map(r => ({ r, g: m.loot.filter(l => l.r === r) })).filter(x => x.g.length);
   el.innerHTML = `<section class="panel">
-    <div class="ph"><div class="ph-title">${monImg(m.name, "ico-xl")}<div><div class="eyebrow">Potwór${m.boss ? ` · <span class="boss boss-inline">BOSS</span>` : ""}</div><h2>${esc(m.name)}</h2></div></div>
-      <a class="sub" href="https://www.landoriaots.pl/monsters.php?name=${encodeURIComponent(m.name)}" target="_blank" rel="noopener noreferrer">Strona potwora ↗</a></div>
+    <div class="ph"><div class="ph-title">${monImg(m.name, "ico-xl")}<div><div class="eyebrow">Monster${m.boss ? ` · <span class="boss boss-inline">BOSS</span>` : ""}</div><h2>${esc(m.name)}</h2></div></div>
+      <a class="sub" href="https://www.landoriaots.pl/monsters.php?name=${encodeURIComponent(m.name)}" target="_blank" rel="noopener noreferrer">Monster page ↗</a></div>
     <div class="stats">
       <div class="stat"><b>${fmt(m.hp)}</b><span>HP</span></div>
-      <div class="stat"><b>${fmt(m.exp)}</b><span>EXP bazowy</span></div>
+      <div class="stat"><b>${fmt(m.exp)}</b><span>Base EXP</span></div>
       <div class="stat"><b>${eph(m)}</b><span>EXP / HP</span></div>
       <div class="stat"><b class="${hitClass(m.hit)}">${fmt(m.hit)}</b><span>Max hit</span></div>
       <div class="stat"><b>${fmt(m.aoe)}</b><span>Max AoE</span></div>
-      <div class="stat"><b>${fmt(worst)}</b><span>Suma maksów</span></div>
+      <div class="stat"><b>${fmt(worst)}</b><span>Sum of max hits</span></div>
     </div>
     <div class="grid2">
-      <div><h3>Ataki</h3>
-        ${sp.length ? `<div class="tbl"><table><thead><tr><th>Typ</th><th>Zasięg</th><th class="n">Min</th><th class="n">Max</th></tr></thead><tbody>
+      <div><h3>Attacks</h3>
+        ${sp.length ? `<div class="tbl"><table><thead><tr><th>Type</th><th>Range</th><th class="n">Min</th><th class="n">Max</th></tr></thead><tbody>
         ${sp.map(s => `<tr><td>${esc(s.type)}</td><td>${esc(s.atk)}</td><td class="n">${fmt(s.min)}</td><td class="n"><span class="bar" data-w="${Math.round(s.max / top * 48)}"></span>${fmt(s.max)}</td></tr>`).join("")}
-        </tbody></table></div>` : `<p class="empty-state">Brak danych o atakach.</p>`}
+        </tbody></table></div>` : `<p class="empty-state">No attack data.</p>`}
       </div>
       <div><h3>Loot</h3>
         ${groups.length ? groups.map(({ r, g }) => `<div class="lootgrp"><div><span class="rar r${r}">${RAR[r]}</span> <span class="chance">${CH[r]}</span></div>
-          <ul>${g.map(l => `<li><span class="li-name">${itemImg(l.name)}<button class="link" data-i="${esc(l.name)}">${esc(l.name)}</button></span><span class="cnt">${l.c > 1 ? "do " + fmt(l.c) : "1"}</span></li>`).join("")}</ul></div>`).join("")
-          : `<p class="empty-state">Brak lootu.</p>`}
+          <ul>${g.map(l => `<li><span class="li-name">${itemImg(l.name)}<button class="link" data-i="${esc(l.name)}">${esc(l.name)}</button></span><span class="cnt">${l.c > 1 ? "up to " + fmt(l.c) : "1"}</span></li>`).join("")}</ul></div>`).join("")
+          : `<p class="empty-state">No loot.</p>`}
       </div>
     </div>
   </section>`;
